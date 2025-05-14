@@ -31,13 +31,13 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="NOMINA_EMPLEADOS.C">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="NOMINA_EMPLEADOS.H" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="nomina_empleados.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="nomina_empleados.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

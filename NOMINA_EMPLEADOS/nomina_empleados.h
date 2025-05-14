@@ -1,5 +1,10 @@
 #ifndef NOMINA_EMPLEADOS_H_INCLUDED
 #define NOMINA_EMPLEADOS_H_INCLUDED
+#include <unistd.h>       //para trabajar con fork()
+#include <sys/wait.h>     //para waitpid
+#include <semaphore.h>
+#include <fcntl.h>        //para constantes de semáforos
+#define SEM_NAME "/semaforo_nomina" //el nombre del semaforo debe empezar con "/"
 
 ///////////////ARCHIVOS DE ENTRADA//////////////
 #define ARC_NOMINA "nomina.txt"
@@ -15,6 +20,14 @@
 #define TAM_ESTADO 20
 #define TAM_CATEGORIA 20
 
+#define SEM_NAME "/semaforo_nomina"
+
+
+typedef struct{
+    int d;
+    int m;
+    int a;
+}Fecha;
 
 typedef struct{
     int legajo;
@@ -32,5 +45,12 @@ typedef struct{
 
 }Categoria;
 
+// nomina_empleados.h
+/*
+void eliminarEmpleadosInactivos();
+void buscarMasAntiguo();
+void contarPorCategoria();
+void actualizarSueldos();
+*/
 
 #endif // NOMINA_EMPLEADOS_H_INCLUDED
