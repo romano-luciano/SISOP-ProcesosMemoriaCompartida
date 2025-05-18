@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "nomina_empleados.h"
 
+//Vengo a molestar jaja
+
 
 int main()
 {
