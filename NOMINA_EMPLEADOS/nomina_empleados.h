@@ -19,6 +19,9 @@
 #define TAM_NOMYAP 30
 #define TAM_ESTADO 20
 #define TAM_CATEGORIA 20
+#define MAXLINE 200
+#define TODO_OK 0
+#define MAX_EMPLEADOS 20
 
 #define SEM_NAME "/semaforo_nomina"
 
@@ -44,6 +47,8 @@ typedef struct{
     float aumento;
 
 }Categoria;
+
+int trozarLinea(char* linea, Empleado empleado);
 
 // nomina_empleados.h
 /*
