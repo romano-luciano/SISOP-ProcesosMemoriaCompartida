@@ -7,7 +7,7 @@
 #define SEM_NAME "/semaforo_nomina" //el nombre del semaforo debe empezar con "/"
 
 ///////////////ARCHIVOS DE ENTRADA//////////////
-#define ARC_NOMINA "nomina.txt"
+#define ARC_NOMINA "../nomina.txt"
 #define ARC_CATEGORIA "categoria.txt"
 
 ///////////////ARCHIVOS DE SALIDA///////////////

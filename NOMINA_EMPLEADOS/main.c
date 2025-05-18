@@ -9,7 +9,8 @@ int main()
     sem_t *semaforo;
 
     ///1- Abrir archivo nomina.txt y cargar datos a estructura
-   ///Lectura de la nomina
+    Empleado empleados[MAX_EMPLEADOS];
+   int cantidad = cargarDatos(ARC_NOMINA, empleados);
 
    
     ///2- Crear semaforo

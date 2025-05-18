@@ -1,6 +1,6 @@
 #include "nomina_Empleados.h"
 
-int cargarDatos(const char *nombreArchivo, Empleado *empleado, int MAX_EMPLEADOS) {
+int cargarDatos(const char *nombreArchivo, Empleado *empleado) {
     
     FILE *archivo = fopen(nombreArchivo, "r");
     
@@ -16,7 +16,7 @@ int cargarDatos(const char *nombreArchivo, Empleado *empleado, int MAX_EMPLEADOS
         // Eliminar salto de línea
         linea[strcspn(linea, "\n")] = 0;
 
-       trozarLinea(linea, )
+        trozarLinea(linea, &empleado[i])
         i++;
     }
 
