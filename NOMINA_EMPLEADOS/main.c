@@ -6,7 +6,7 @@
 int main()
 {
 
-    pid_t pid1, pid2, pid3, pid4;//variables que se usan para guardar el valor que devuelve el fork( )
+    pid_t hijo1, hijo2, hijo3, hijo4;//variables que se usan para guardar el valor que devuelve el fork( )
     sem_t *semaforo;
 
     ///1- Abrir archivo nomina.txt y cargar datos a estructura
@@ -21,8 +21,8 @@ int main()
     }
 
     ///3- Crear proceso hijo 1 (Elimina empelados inactivos)
-    pid1 = fork(); //Hijo 1 usa semaforo porque modifica los datos
-    if(pid1 == 0){
+    hijo1 = fork(); //Hijo 1 usa semaforo porque modifica los datos
+    if(hijo1 == 0){
         puts("Hijo 1: eliminando empleados inactivos---\n");
         sem_wait(semaforo); //Bloquea acceso a datos compartidos
     //Codigo para eliminar inactivos
@@ -31,24 +31,24 @@ int main()
     }
 
     ///4- Crear proceso hijo 2 (buscar mas antiguo)
-    pid2 = fork();
-    if(pid2 == 0){
+    hijo2 = fork();
+    if(hijo2 == 0){
         puts("Hijo 2: buscando empleado mas antiguo...\n");
     //Codigo para buscar al empleado mas antiguo
     exit(0);
     }
 
     ///5- Crear hijo 3 (Contar empleados por categoria)
-    pid3 = fork();
-    if(pid3 == 0){
+    hijo3 = fork();
+    if(hijo3 == 0){
         puts("Hijo 3: contando empleados por categoria...\n");
     //Codigo para contar por categoria
     exit(0);
     }
 
     ///6- Crear proceso hijo 4 (Actualizar sueldos)
-    pid4 = fork();
-    if(pid4 == 0){
+    hijo4 = fork();
+    if(hijo4 == 0){
         puts("Hijo 4: actualizando sueldos por categoria...\n");
         sem_wait(semaforo);
     //Codigo para actualizar sueldos
@@ -57,10 +57,10 @@ int main()
     }
 
     ///7- Esperar a los 3 hijos restantes
-    waitpid(pid1, NULL, 0);
-    waitpid(pid2,NULL, 0);
-    waitpid(pid3, NULL, 0);
-    waitpid(pid4, NULL, 0);
+    waitpid(hijo1, NULL, 0);
+    waitpid(hijo2,NULL, 0);
+    waitpid(hijo3, NULL, 0);
+    waitpid(hijo4, NULL, 0);
 
     ///8- Guardar resultados finales en archivos
     puts("Padre: generando archivos de salida (nomina, resumen)...\n");
@@ -70,6 +70,8 @@ int main()
     sem_unlink(SEM_NAME);
 
     puts("Padre: todo finalizando.\n");
+
+    //falta agregar la parte de archivos y primitivas
 
     return 0;
 }

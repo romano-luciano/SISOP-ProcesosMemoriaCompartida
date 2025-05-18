@@ -15,3 +15,17 @@
 1747244620 source:/home/luleebelen/SISOP-ProcesosMemoriaCompartida/NOMINA_EMPLEADOS/nomina_empleados.c
 	"nomina_empleados.h"
 
+1747335372 source:/home/lourdesbelen/SISOP-ProcesosMemoriaCompartida/NOMINA_EMPLEADOS/nomina_empleados.c
+	"nomina_empleados.h"
+
+1747335372 /home/lourdesbelen/SISOP-ProcesosMemoriaCompartida/NOMINA_EMPLEADOS/nomina_empleados.h
+	<unistd.h>
+	<sys/wait.h>
+	<semaphore.h>
+	<fcntl.h>
+
+1747336078 source:/home/lourdesbelen/SISOP-ProcesosMemoriaCompartida/NOMINA_EMPLEADOS/main.c
+	<stdio.h>
+	<stdlib.h>
+	"nomina_empleados.h"
+
