@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "nomina_empleados.h"
 
 
@@ -11,7 +9,7 @@ int main()
     ///1- Abrir archivo nomina.txt y cargar datos a estructura
     Empleado empleados[MAX_EMPLEADOS];
    int cantidad = cargarDatos(ARC_NOMINA, empleados);
-
+    printf("%d",cantidad);
    
     ///2- Crear semaforo
     sem_unlink(SEM_NAME); //Elimina semaforo anterior si quedo basura
