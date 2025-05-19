@@ -1,9 +1,9 @@
-#include "nomina_Empleados.h"
+
+#include "nomina_empleados.h"
 
 int cargarDatos(const char *nombreArchivo, Empleado *empleado) {
-    
     FILE *archivo = fopen(nombreArchivo, "r");
-    
+
     if (!archivo) {
         perror("Error al abrir el archivo");
         return 0;
@@ -13,40 +13,60 @@ int cargarDatos(const char *nombreArchivo, Empleado *empleado) {
     int i = 0;
 
     while (fgets(linea, sizeof(linea), archivo)) {
-        // Eliminar salto de línea
         linea[strcspn(linea, "\n")] = 0;
-
-        trozarLinea(linea, &empleado[i])
-        i++;
+        if (trozarLinea(linea, &empleado[i]) == 0) {
+            i++;
+        } else {
+            printf("Error en línea %d\n", i + 1);
+        }
     }
 
     fclose(archivo);
-    return i; // cantidad de personas cargadas
+    return i;
 }
 
 
-int trozarLinea(char* linea, Empleado* Empleado){
-    char* aux;
-    aux = strrchr(linea,'|');
-    sscanf(aux+1,"%f",&(Empleado->sueldo));
-    *aux= '\0';
-    aux= strrchr(linea,'|');
-    strcpy(Empleado->categoria,aux+1);
-    *aux='\0';
-    aux= strrchr(linea,'|');
-    strcpy(Empleado->estado,aux+1);
-    aux= strrchr(linea,'-');
-    sscanf(aux+1,"%d",&(Empleado->fecha_ingreso.a));
-    *aux='\0';
-    aux= strrchr(linea,'-');
-    sscanf(aux+1,"%d",&(Empleado->fecha_ingreso.m));
-    *aux='\0';
-    aux= strrchr(linea,'|');
-    sscanf(aux+1,"%d",&(Empleado->fecha_ingreso.d));
-    *aux='\0';
-    aux= strrchr(linea,'|');
-    strcpy(Empleado->nombre_y_ap,aux+1);
-    *aux='\0';
-    sscanf(linea,"%d",&(Empleado->legajo));
+
+int trozarLinea(char* linea, Empleado* empleado) {
+    char* token;
+
+    // Legajo
+    token = strtok(linea, "|");
+    if (!token) return -1;
+    empleado->legajo = atoi(token);
+
+    // Nombre y Apellido
+    token = strtok(NULL, "|");
+    if (!token) return -1;
+    strcpy(empleado->nombre_y_ap, token);
+
+    // Fecha
+    token = strtok(NULL, "|");
+    if (!token) return -1;
+    printf("Fecha cruda: '%s'\n", token);
+    sscanf(token, "%2d-%2d-%4d",
+       &(empleado->fecha_ingreso.d),
+       &(empleado->fecha_ingreso.m),
+       &(empleado->fecha_ingreso.a));
+
+
+    // Estado
+    token = strtok(NULL, "|");
+    if (!token) return -1;
+    strcpy(empleado->estado, token);
+
+    // Categoría
+    token = strtok(NULL, "|");
+    if (!token) return -1;
+    strcpy(empleado->categoria, token);
+
+    // Sueldo
+    token = strtok(NULL, "|");
+    if (!token) return -1;
+    empleado->sueldo = atof(token);
+
     return 0;
 }
+
+
+

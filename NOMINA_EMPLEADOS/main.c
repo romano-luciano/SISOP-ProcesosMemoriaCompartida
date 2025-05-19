@@ -1,16 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "nomina_empleados.h"
 
+void mostrarEmpleados(Empleado *empleados, int cantidad);
 
 int main()
-{   
+{
     pid_t hijo1, hijo2, hijo3, hijo4;//variables que se usan para guardar el valor que devuelve el fork( )
     sem_t *semaforo;
 
     ///1- Abrir archivo nomina.txt y cargar datos a estructura
-    Empleado empleados[MAX_EMPLEADOS];
+   Empleado empleados[MAX_EMPLEADOS];
    int cantidad = cargarDatos(ARC_NOMINA, empleados);
-    printf("%d",cantidad);
-   
+
+   if (cantidad > 0) {
+        mostrarEmpleados(empleados, cantidad);
+    } else {
+        printf("No se pudieron cargar empleados.\n");
+    }
+
+
     ///2- Crear semaforo
     sem_unlink(SEM_NAME); //Elimina semaforo anterior si quedo basura
     semaforo = sem_open(SEM_NAME, O_CREAT, 0644, 1); //Crea un semaforo con valor inicial 1, que usaremos para asegurar exclusion mutua(que no se modifiquen los datos al mismo tiempo desde dos procesos).
@@ -75,3 +84,24 @@ int main()
 
     return 0;
 }
+
+void mostrarEmpleados(Empleado *empleados, int cantidad) {
+    printf("%s | %s | %s | %s | %s | %s","Legajo", "Nombre y Apellido", "Fecha", "Estado", "Categoría", "Sueldo");
+    printf("\n--------------------------------------------------------------------------------\n");
+
+    for (int i = 0; i < cantidad; i++) {
+        printf("%d | %s | %d-%d-%d | %s | %s | %f\n",
+               empleados[i].legajo,
+               empleados[i].nombre_y_ap,
+               empleados[i].fecha_ingreso.d,
+               empleados[i].fecha_ingreso.m,
+               empleados[i].fecha_ingreso.a,
+               empleados[i].estado,
+               empleados[i].categoria,
+               empleados[i].sueldo);
+
+    printf("\n");
+
+    }
+}
+

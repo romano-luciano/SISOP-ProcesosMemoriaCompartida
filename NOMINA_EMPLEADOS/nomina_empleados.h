@@ -4,9 +4,6 @@
 #include <sys/wait.h>     //para waitpid
 #include <semaphore.h>
 #include <fcntl.h>        //para constantes de semáforos
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 #define SEM_NAME "/semaforo_nomina" //el nombre del semaforo debe empezar con "/"
 
 ///////////////ARCHIVOS DE ENTRADA//////////////
@@ -22,11 +19,15 @@
 #define TAM_NOMYAP 30
 #define TAM_ESTADO 20
 #define TAM_CATEGORIA 20
-#define MAXLINEA 200
+#define MAXLINEA 256
 #define TODO_OK 0
-#define MAX_EMPLEADOS 20
+#define MAX_EMPLEADOS 100
 
 #define SEM_NAME "/semaforo_nomina"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 
 typedef struct{
@@ -52,8 +53,7 @@ typedef struct{
 }Categoria;
 
 int trozarLinea(char* linea, Empleado* empleado);
-int cargarDatos(const char *nombreArchivo, Empleado *empleado);
-
+int cargarDatos(const char *nombreArchivo, Empleado *empleado) ;
 // nomina_empleados.h
 /*
 void eliminarEmpleadosInactivos();
