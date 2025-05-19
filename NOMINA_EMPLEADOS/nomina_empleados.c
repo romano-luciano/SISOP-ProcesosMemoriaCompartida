@@ -28,45 +28,63 @@ int cargarDatos(const char *nombreArchivo, Empleado *empleado) {
 
 
 int trozarLinea(char* linea, Empleado* empleado) {
-    char* token;
+    char* dato;//Va a contener el dato que vamos a guardar en las varibles
 
     // Legajo
-    token = strtok(linea, "|");
-    if (!token) return -1;
-    empleado->legajo = atoi(token);
+    dato = strtok(linea, "|");
+    if (!dato) return -1;
+    empleado->legajo = atoi(dato);
 
     // Nombre y Apellido
-    token = strtok(NULL, "|");
-    if (!token) return -1;
-    strcpy(empleado->nombre_y_ap, token);
+    dato = strtok(NULL, "|");
+    if (!dato) return -1;
+    strcpy(empleado->nombre_y_ap, dato);
 
     // Fecha
-    token = strtok(NULL, "|");
-    if (!token) return -1;
-    printf("Fecha cruda: '%s'\n", token);
-    sscanf(token, "%2d-%2d-%4d",
+    dato = strtok(NULL, "|");
+    if (!dato) return -1;
+    sscanf(dato, "%2d/%2d/%4d",
        &(empleado->fecha_ingreso.d),
        &(empleado->fecha_ingreso.m),
        &(empleado->fecha_ingreso.a));
 
 
     // Estado
-    token = strtok(NULL, "|");
-    if (!token) return -1;
-    strcpy(empleado->estado, token);
+    dato = strtok(NULL, "|");
+    if (!dato) return -1;
+    strcpy(empleado->estado, dato);
 
     // Categoría
-    token = strtok(NULL, "|");
-    if (!token) return -1;
-    strcpy(empleado->categoria, token);
+    dato = strtok(NULL, "|");
+    if (!dato) return -1;
+    strcpy(empleado->categoria, dato);
 
     // Sueldo
-    token = strtok(NULL, "|");
-    if (!token) return -1;
-    empleado->sueldo = atof(token);
+    dato = strtok(NULL, "|");
+    if (!dato) return -1;
+    empleado->sueldo = atof(dato);
 
     return 0;
 }
 
+void mostrarEmpleados(Empleado *empleados, int cantidad) {
+    printf("%s | %s | %s | %s | %s | %s","Legajo", "Nombre y Apellido", "Fecha", "Estado", "Categoría", "Sueldo");
+    printf("\n--------------------------------------------------------------------------------\n");
+
+    for (int i = 0; i < cantidad; i++) {
+        printf("%d | %s | %d-%d-%d | %s | %s | %f\n",
+               empleados[i].legajo,
+               empleados[i].nombre_y_ap,
+               empleados[i].fecha_ingreso.d,
+               empleados[i].fecha_ingreso.m,
+               empleados[i].fecha_ingreso.a,
+               empleados[i].estado,
+               empleados[i].categoria,
+               empleados[i].sueldo);
+
+    printf("\n");
+
+    }
+}
 
 

@@ -54,6 +54,8 @@ typedef struct{
 
 int trozarLinea(char* linea, Empleado* empleado);
 int cargarDatos(const char *nombreArchivo, Empleado *empleado) ;
+void mostrarEmpleados(Empleado *empleados, int cantidad);
+
 // nomina_empleados.h
 /*
 void eliminarEmpleadosInactivos();

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "nomina_empleados.h"
 
-void mostrarEmpleados(Empleado *empleados, int cantidad);
+
 
 int main()
 {
@@ -13,11 +13,12 @@ int main()
    Empleado empleados[MAX_EMPLEADOS];
    int cantidad = cargarDatos(ARC_NOMINA, empleados);
 
-   if (cantidad > 0) {
+    //Para mostrar el vector empleados
+   /*if (cantidad > 0) {
         mostrarEmpleados(empleados, cantidad);
     } else {
         printf("No se pudieron cargar empleados.\n");
-    }
+    }*/
 
 
     ///2- Crear semaforo
@@ -85,23 +86,5 @@ int main()
     return 0;
 }
 
-void mostrarEmpleados(Empleado *empleados, int cantidad) {
-    printf("%s | %s | %s | %s | %s | %s","Legajo", "Nombre y Apellido", "Fecha", "Estado", "Categoría", "Sueldo");
-    printf("\n--------------------------------------------------------------------------------\n");
 
-    for (int i = 0; i < cantidad; i++) {
-        printf("%d | %s | %d-%d-%d | %s | %s | %f\n",
-               empleados[i].legajo,
-               empleados[i].nombre_y_ap,
-               empleados[i].fecha_ingreso.d,
-               empleados[i].fecha_ingreso.m,
-               empleados[i].fecha_ingreso.a,
-               empleados[i].estado,
-               empleados[i].categoria,
-               empleados[i].sueldo);
-
-    printf("\n");
-
-    }
-}
 
