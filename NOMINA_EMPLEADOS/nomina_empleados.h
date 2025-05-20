@@ -23,7 +23,7 @@
 #define TODO_OK 0
 #define MAX_EMPLEADOS 100
 
-#define SEM_NAME "/semaforo_nomina"
+
 
 #include <stdio.h>
 #include <stdlib.h>
