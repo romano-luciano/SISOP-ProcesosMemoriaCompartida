@@ -43,7 +43,7 @@ int trozarLinea(char* linea, Empleado* empleado) {
     // Fecha
     dato = strtok(NULL, "|");
     if (!dato) return -1;
-    sscanf(dato, "%2d/%2d/%4d",
+    sscanf(dato, "%2d-%2d-%4d",
        &(empleado->fecha_ingreso.d),
        &(empleado->fecha_ingreso.m),
        &(empleado->fecha_ingreso.a));

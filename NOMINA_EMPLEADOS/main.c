@@ -1,5 +1,11 @@
 #include "nomina_empleados.h"
 
+// Estos cuatro include son necesarios para la memoria compartida
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <semaphore.h>
+
 #define MC_NAME "/mi_memoriaCompartida"
 #define SEM_NAME "/semaforo_nomina"
 
@@ -19,18 +25,18 @@ int main()
     }
 
     // 2.0 - Preparo la variable 'empleados' para trabajar como Mem.Copartida
-    //Se crea un objeto de memoria compartida POSIX, identificado por un nombre (debe empezar con '/' porque va a estar dentro de la misma carpeta del proyecto)
+    // Se crea un objeto de memoria compartida POSIX, identificado por un nombre (debe empezar con '/' porque va a estar dentro de la misma carpeta del proyecto)
     int Id_MC = shm_open(MC_NAME, O_CREAT | O_RDWR, 0666);
     if (Id_MC == -1)
     {
-        perror("Fallo al crear la Memoria Compartida");//Tira el msj como del tipo error
+        perror("Fallo al crear la Memoria Compartida"); // Tira el msj como del tipo error
         exit(1);
     }
 
-    //Esta funcion asigna un tamaño a la memoria compartida para la cantidad de empleados
-    ftruncate(Id_MC, sizeof(Empleado) * MAX_EMPLEADOS); 
+    // Esta funcion asigna un tamaño a la memoria compartida para la cantidad de empleados
+    ftruncate(Id_MC, sizeof(Empleado) * MAX_EMPLEADOS);
 
-    //Hace que el proceso puede usar el arreglo 'empleados' como si fuera una variable normal, pero en realidad está accediendo a memoria compartida.
+    // Hace que el proceso puede usar el arreglo 'empleados' como si fuera una variable normal, pero en realidad está accediendo a memoria compartida.
     Empleado *empleados = mmap(NULL, sizeof(Empleado) * MAX_EMPLEADOS, PROT_READ | PROT_WRITE, MAP_SHARED, Id_MC, 0);
     if (empleados == MAP_FAILED)
     {
@@ -39,17 +45,18 @@ int main()
     }
 
     // 2.1 - Abrir archivo nomina.txt y cargar datos a estructura
-    //La variable 'cantidad' no es Mem.Comp
+    // La variable 'cantidad' no es Mem.Comp
     int cantidad = cargarDatos(ARC_NOMINA, empleados);
 
     // Para mostrar el vector empleados
-    /*if (cantidad > 0) {
-         mostrarEmpleados(empleados, cantidad);
-     } else {
-         printf("No se pudieron cargar empleados.\n");
-     }*/
-
-    
+    if (cantidad > 0)
+    {
+        mostrarEmpleados(empleados, cantidad);
+    }
+    else
+    {
+        printf("No se pudieron cargar empleados.\n");
+    }
 
     /// 3- Crear proceso hijo 1 (Elimina empelados inactivos)
     hijo1 = fork(); // Hijo 1 usa semaforo porque modifica los datos
@@ -109,6 +116,19 @@ int main()
     puts("Padre: todo finalizando.\n");
 
     // falta agregar la parte de archivos y primitivas
+
+    // Liberar Mem.Comp
+    munmap(empleados, sizeof(Empleado) * MAX_EMPLEADOS); // Desmapear
+    int seEliminaMC = shm_unlink(MC_NAME)
+
+    if (seEliminaMC == -1)
+    {
+        perror("Error al eliminar la memoria compartida");
+    }
+    else
+    {
+        printf("Memoria compartida eliminada correctamente.\n");
+    }
 
     return 0;
 }
