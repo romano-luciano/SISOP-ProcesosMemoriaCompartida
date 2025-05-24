@@ -25,8 +25,6 @@ int cargarDatos(const char *nombreArchivo, Empleado *empleado) {
     return i;
 }
 
-
-
 int trozarLinea(char* linea, Empleado* empleado) {
     char* dato;//Va a contener el dato que vamos a guardar en las varibles
 
@@ -87,4 +85,23 @@ void mostrarEmpleados(Empleado *empleados, int cantidad) {
     }
 }
 
+int eliminarEmpleadosInactivos(Empleado *empleados, int *cantidad){
+    int cantEmpleadosElim=0;
 
+    for (int i = 0; i < *cantidad; i++) {
+        //Preguntamos si el empleado esta 'inactivo' (camparamos todo en minusculas)
+        if (strcmp(tolower(empleados[i].estado), "inactivo") == 0) {
+            //Aumentamos el contador de empleados eliminados
+            cantEmpleadosElim++;
+            // No lo eliminamos como tal, sino que movemos los regiustros de adelante, pisando el registro
+            for (int j = i; j < *cantidad - 1; j++) {
+                empleados[j] = empleados[j + 1];
+            }
+            (*cantidad)--; //Decrementamos la cantidad de empleados del vector
+            i--; //Como movemos los registros de adelante, tenemos que evaluar la misma posicion en donde queda el elemento que estaba adelante antes
+        }
+    }
+
+    return cantEmpleadosElim;
+
+}

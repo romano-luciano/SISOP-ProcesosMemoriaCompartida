@@ -58,19 +58,30 @@ int main()
         printf("No se pudieron cargar empleados.\n");
     }
 
+    int cantEmpleadosElim;
     /// 3- Crear proceso hijo 1 (Elimina empelados inactivos)
     hijo1 = fork(); // Hijo 1 usa semaforo porque modifica los datos
     if (hijo1 == 0)
     {
-        puts("Hijo 1: eliminando empleados inactivos---\n");
+        puts("\nHijo 1: eliminando empleados inactivos---\n");
         sem_wait(semaforo); // Bloquea acceso a datos compartidos
 
         // Codigo para eliminar inactivos
+        cantEmpleadosElim = eliminarEmpleadosInactivos(empleados,&cantidad);
 
         sem_post(semaforo); // Libera acceso
         exit(0);
     }
 
+    if (cantidad > 0)
+    {
+        mostrarEmpleados(empleados, cantidad);
+    }
+    else
+    {
+        printf("No se pudieron cargar empleados.\n");
+    }
+    
     /// 4- Crear proceso hijo 2 (buscar mas antiguo)
     hijo2 = fork();
     if (hijo2 == 0)

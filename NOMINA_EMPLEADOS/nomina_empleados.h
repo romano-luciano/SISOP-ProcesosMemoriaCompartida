@@ -21,6 +21,7 @@
 #define TAM_CATEGORIA 20
 #define MAXLINEA 256
 #define TODO_OK 0
+#define FALLO_ELIMINAR_DUPLICADOS 1
 #define MAX_EMPLEADOS 100
 
 
@@ -57,8 +58,10 @@ int cargarDatos(const char *nombreArchivo, Empleado *empleado) ;
 void mostrarEmpleados(Empleado *empleados, int cantidad);
 
 // nomina_empleados.h
+
+int eliminarEmpleadosInactivos(Empleado *empleados,int *cantidad);
+
 /*
-void eliminarEmpleadosInactivos();
 void buscarMasAntiguo();
 void contarPorCategoria();
 void actualizarSueldos();
