@@ -49,21 +49,22 @@ int main()
     int cantidad = cargarDatos(ARC_NOMINA, empleados);
 
     // Para mostrar el vector empleados
-    if (cantidad > 0)
+    /*if (cantidad > 0)
     {
         mostrarEmpleados(empleados, cantidad);
     }
     else
     {
         printf("No se pudieron cargar empleados.\n");
-    }
+    }*/
 
-    int cantEmpleadosElim;
+    int cantEmpleadosElim=0;
+
     /// 3- Crear proceso hijo 1 (Elimina empelados inactivos)
     hijo1 = fork(); // Hijo 1 usa semaforo porque modifica los datos
     if (hijo1 == 0)
     {
-        puts("\nHijo 1: eliminando empleados inactivos---\n");
+        puts("\n--- Eliminando empleados inactivos ---\n");
         sem_wait(semaforo); // Bloquea acceso a datos compartidos
 
         // Codigo para eliminar inactivos
@@ -73,15 +74,8 @@ int main()
         exit(0);
     }
 
-    if (cantidad > 0)
-    {
-        mostrarEmpleados(empleados, cantidad);
-    }
-    else
-    {
-        printf("No se pudieron cargar empleados.\n");
-    }
-    
+    printf("\nSe eliminaron %d empelados\n",cantEmpleadosElim);
+
     /// 4- Crear proceso hijo 2 (buscar mas antiguo)
     hijo2 = fork();
     if (hijo2 == 0)
@@ -130,7 +124,7 @@ int main()
 
     // Liberar Mem.Comp
     munmap(empleados, sizeof(Empleado) * MAX_EMPLEADOS); // Desmapear
-    int seEliminaMC = shm_unlink(MC_NAME)
+    int seEliminaMC = shm_unlink(MC_NAME);
 
     if (seEliminaMC == -1)
     {

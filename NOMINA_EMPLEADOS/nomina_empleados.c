@@ -90,9 +90,10 @@ int eliminarEmpleadosInactivos(Empleado *empleados, int *cantidad){
 
     for (int i = 0; i < *cantidad; i++) {
         //Preguntamos si el empleado esta 'inactivo' (camparamos todo en minusculas)
-        if (strcmp(tolower(empleados[i].estado), "inactivo") == 0) {
+        if (strcmp(empleados[i].estado, "inactivo") == 0) {
             //Aumentamos el contador de empleados eliminados
             cantEmpleadosElim++;
+            puts("Se elimino");
             // No lo eliminamos como tal, sino que movemos los regiustros de adelante, pisando el registro
             for (int j = i; j < *cantidad - 1; j++) {
                 empleados[j] = empleados[j + 1];
@@ -102,6 +103,7 @@ int eliminarEmpleadosInactivos(Empleado *empleados, int *cantidad){
         }
     }
 
+    printf("Se eliminaron %d empleados\n",cantEmpleadosElim);
     return cantEmpleadosElim;
 
 }
