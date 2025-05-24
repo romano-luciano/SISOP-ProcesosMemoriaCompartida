@@ -1,0 +1,4 @@
+Inicial|0.10
+Intermedio|0.15
+Superior|0.20
+Lider|0.25

@@ -46,7 +46,6 @@ int trozarLinea(char* linea, Empleado* empleado) {
        &(empleado->fecha_ingreso.m),
        &(empleado->fecha_ingreso.a));
 
-
     // Estado
     dato = strtok(NULL, "|");
     if (!dato) return -1;
@@ -85,6 +84,7 @@ void mostrarEmpleados(Empleado *empleados, int cantidad) {
     }
 }
 
+//////////PROCESO HIJO 1 - ELIMINAR EMPLEADOS INACTIVOS/////////////////////
 int eliminarEmpleadosInactivos(Empleado *empleados, int *cantidad){
     int cantEmpleadosElim=0;
 
@@ -93,7 +93,7 @@ int eliminarEmpleadosInactivos(Empleado *empleados, int *cantidad){
         if (strcmp(empleados[i].estado, "inactivo") == 0) {
             //Aumentamos el contador de empleados eliminados
             cantEmpleadosElim++;
-            puts("Se elimino");
+            //puts("Se elimino");
             // No lo eliminamos como tal, sino que movemos los regiustros de adelante, pisando el registro
             for (int j = i; j < *cantidad - 1; j++) {
                 empleados[j] = empleados[j + 1];
@@ -106,4 +106,81 @@ int eliminarEmpleadosInactivos(Empleado *empleados, int *cantidad){
     printf("Se eliminaron %d empleados\n",cantEmpleadosElim);
     return cantEmpleadosElim;
 
+}
+
+//////////PROCESO HIJO 4 - ACTUALIZAR SUELDOS SEGUN CATEGORIA/////////////////////
+int cargarCategoria(const char *nombreArchivo, Categoria *categoria)
+{
+   FILE* archivoCategoria = fopen(nombreArchivo,"r");
+
+    if (!archivoCategoria) {
+        perror("Error al abrir el archivo");
+        return 0;
+    }
+
+    char lineaCategoria[MAX_LINEACAT];
+    int i = 0;
+
+    while(fgets(lineaCategoria, sizeof(lineaCategoria), archivoCategoria))
+    {
+        lineaCategoria[strcspn(lineaCategoria, "\n")] = 0;
+
+        if (trozarLineaCategoria(lineaCategoria, &categoria[i]) == 0) {
+            i++;
+        } else {
+            printf("Error en línea %d\n", i + 1);
+        }
+    }
+    fclose(archivoCategoria);
+    return i;
+}
+
+int trozarLineaCategoria(char *linea, Categoria *categoria)
+{
+    char *dato;
+
+    //CATEGORIA
+    dato = strtok(linea, "|");
+    if (!dato) return -1;
+    strcpy(categoria->categoria, dato);
+
+    //AUMENTO
+    dato = strtok(NULL, "|"); //Para que me de lo que sigue despues del | que es el aumento
+    if (!dato) return -1;
+    categoria->aumento = atof(dato); //Convierte string a float
+
+    return TODO_OK;
+}
+
+void actualizarSueldos(const char *nombreArchivo, Empleado *empleados, int cantEmp, Categoria *categorias, int cantCat)
+{
+    FILE *archivo = fopen(nombreArchivo,"w");
+
+    if(!archivo){
+        perror("Error al crear nomina_actualizada.txt");
+        return;
+    }
+
+    for(int i = 0; i < cantEmp; i++)
+    {
+        for(int j = 0; j< cantCat; j++)
+        {
+            if(strcmp(empleados[i].categoria, categorias[j].categoria) == 0)
+            {
+                empleados[i].sueldo *= (1 + categorias[j].aumento /100.0);
+                break;
+            }
+        }
+            fprintf(archivo, "%d|%s|%02d/%02d/%04d|%s|%s|%.2f\n",
+                empleados[i].legajo,
+                empleados[i].nombre_y_ap,
+                empleados[i].fecha_ingreso.d,
+                empleados[i].fecha_ingreso.m,
+                empleados[i].fecha_ingreso.a,
+                empleados[i].estado,
+                empleados[i].categoria,
+                empleados[i].sueldo);
+    }
+
+    fclose(archivo);
 }

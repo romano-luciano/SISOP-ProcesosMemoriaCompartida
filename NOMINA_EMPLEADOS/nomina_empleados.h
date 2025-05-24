@@ -8,7 +8,7 @@
 
 ///////////////ARCHIVOS DE ENTRADA//////////////
 #define ARC_NOMINA "../nomina.txt"
-#define ARC_CATEGORIA "categoria.txt"
+#define ARC_CATEGORIA "../categoria.txt"
 
 ///////////////ARCHIVOS DE SALIDA///////////////
 #define ARC_NOMINA_ACT "nomina_actualizada.txt"
@@ -24,6 +24,8 @@
 #define FALLO_ELIMINAR_DUPLICADOS 1
 #define MAX_EMPLEADOS 100
 
+#define MAX_CATEGORIA 10
+#define MAX_LINEACAT 15
 
 
 #include <stdio.h>
@@ -64,7 +66,13 @@ int eliminarEmpleadosInactivos(Empleado *empleados,int *cantidad);
 /*
 void buscarMasAntiguo();
 void contarPorCategoria();
-void actualizarSueldos();
 */
+
+//Proceso hijo 4 - Actualizar Sueldos con ARC_CARTEGORIA
+int cargarCategoria(const char *archivoCategoria, Categoria *categoria);
+int trozarLineaCategoria(char *linea, Categoria *categoria);
+void actualizarSueldos(const char *nombreArchivo, Empleado *empleados, int cantEmp, Categoria *categorias, int cantCat);
+//void actualizarSueldos();
+
 
 #endif // NOMINA_EMPLEADOS_H_INCLUDED

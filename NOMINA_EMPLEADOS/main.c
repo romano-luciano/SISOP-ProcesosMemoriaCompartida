@@ -1,5 +1,4 @@
 #include "nomina_empleados.h"
-
 // Estos cuatro include son necesarios para la memoria compartida
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -64,7 +63,7 @@ int main()
     hijo1 = fork(); // Hijo 1 usa semaforo porque modifica los datos
     if (hijo1 == 0)
     {
-        puts("\n--- Eliminando empleados inactivos ---\n");
+        puts("\nHijo 1: Eliminando empleados inactivos...\n");
         sem_wait(semaforo); // Bloquea acceso a datos compartidos
 
         // Codigo para eliminar inactivos
@@ -73,8 +72,7 @@ int main()
         sem_post(semaforo); // Libera acceso
         exit(0);
     }
-
-    printf("\nSe eliminaron %d empelados\n",cantEmpleadosElim);
+    //printf("Se eliminaron %d empelados\n",cantEmpleadosElim);
 
     /// 4- Crear proceso hijo 2 (buscar mas antiguo)
     hijo2 = fork();
@@ -98,11 +96,20 @@ int main()
     hijo4 = fork();
     if (hijo4 == 0)
     {
-        puts("Hijo 4: actualizando sueldos por categoria...\n");
-        sem_wait(semaforo);
-        // Codigo para actualizar sueldos
-        sem_post(semaforo);
-        exit(0);
+    puts("Hijo 4: actualizando sueldos por categoria...\n");
+    sem_wait(semaforo);
+
+    //Cargar categoria.txt -> categoria|aumento
+    Categoria categoria[MAX_CATEGORIA];
+    int cantCat = cargarCategoria(ARC_CATEGORIA, categoria);
+    // Actualizar sueldos - generando un nomina_actualizada
+    // con el aumento en los sueldos segun su categoria
+    puts("Se genero nomina_actualizada.txt");
+    actualizarSueldos("nomina_actualizada.txt", empleados, cantidad, categoria, cantCat);
+
+    sem_post(semaforo);
+    exit(0);
+
     }
 
     /// 7- Esperar a los 3 hijos restantes
