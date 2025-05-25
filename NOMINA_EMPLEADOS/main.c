@@ -129,6 +129,15 @@ int main()
     {
         puts("Hijo 3: contando empleados por categoria...\n");
         // Codigo para contar por categoria
+
+        // Contar empleados por categoría y guardar en memoria compartida
+        contarPorCategoria(empleados, cantidad, categorias, resultadosDeHijos->cantEmpleadosXCat);
+
+        // Puedes imprimir el resultado si quieres
+        for (int i = 0; i < CANT_CATEGORIA; i++) {
+            printf("Categoria %s: %d empleados\n", categorias[i].categoria, resultadosDeHijos->cantEmpleadosXCat[i]);
+        }        
+        
         exit(0);
     }
 

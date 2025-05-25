@@ -106,6 +106,22 @@ int eliminarEmpleadosInactivos(Empleado *empleados, int *cantidad){
 
 }
 
+void contarPorCategoria(Empleado *empleados, int cantidad, Categoria *categorias, int *cantEmpleadosXCat) {
+    // Inicializa el contador
+    for (int i = 0; i < CANT_CATEGORIA; i++) {
+        cantEmpleadosXCat[i] = 0;
+    }
+
+    // Cuenta empleados por categoría
+    for (int i = 0; i < cantidad; i++) {
+        for (int j = 0; j < CANT_CATEGORIA; j++) {
+            if (strcmp(empleados[i].categoria, categorias[j].categoria) == 0) {
+                cantEmpleadosXCat[j]++;
+            }
+        }
+    }
+}
+
 Empleado buscarEmpleadoMasAntiguo(Empleado *empleados,int *cantidad){
     Empleado empleadoMasAntiguo;
 
