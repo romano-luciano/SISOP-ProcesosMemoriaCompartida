@@ -93,7 +93,6 @@ int eliminarEmpleadosInactivos(Empleado *empleados, int *cantidad){
         if (strcmp(empleados[i].estado, "inactivo") == 0) {
             //Aumentamos el contador de empleados eliminados
             cantEmpleadosElim++;
-            puts("Se elimino");
             // No lo eliminamos como tal, sino que movemos los regiustros de adelante, pisando el registro
             for (int j = i; j < *cantidad - 1; j++) {
                 empleados[j] = empleados[j + 1];
@@ -103,7 +102,35 @@ int eliminarEmpleadosInactivos(Empleado *empleados, int *cantidad){
         }
     }
 
-    printf("Se eliminaron %d empleados\n",cantEmpleadosElim);
     return cantEmpleadosElim;
 
+}
+
+Empleado buscarEmpleadoMasAntiguo(Empleado *empleados,int *cantidad){
+    Empleado empleadoMasAntiguo;
+
+    for(int i=0; i < *cantidad - 1; i++){
+
+        if(i == 0){
+            empleadoMasAntiguo = empleados[i];
+        }else{
+            if(compararFechas(empleadoMasAntiguo.fecha_ingreso,empleados[i].fecha_ingreso) > 0)
+                empleadoMasAntiguo = empleados[i];
+        }
+    }
+
+    return empleadoMasAntiguo;
+}
+
+int compararFechas(Fecha f1, Fecha f2) {
+    if (f1.a > f2.a) return 1;
+    if (f1.a < f2.a) return -1;
+
+    if (f1.m > f2.m) return 1;
+    if (f1.m < f2.m) return -1;
+
+    if (f1.d > f2.d) return 1;
+    if (f1.d < f2.d) return -1;
+
+    return 0;
 }

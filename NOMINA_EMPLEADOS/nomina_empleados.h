@@ -8,7 +8,7 @@
 
 ///////////////ARCHIVOS DE ENTRADA//////////////
 #define ARC_NOMINA "../nomina.txt"
-#define ARC_CATEGORIA "categoria.txt"
+#define ARC_CATEGORIA "../categoria.txt"
 
 ///////////////ARCHIVOS DE SALIDA///////////////
 #define ARC_NOMINA_ACT "nomina_actualizada.txt"
@@ -24,7 +24,7 @@
 #define FALLO_ELIMINAR_DUPLICADOS 1
 #define MAX_EMPLEADOS 100
 
-
+#define CANT_CATEGORIA 3
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,16 +53,23 @@ typedef struct{
 
 }Categoria;
 
+typedef struct{
+    int cantEmpleadosElim;
+    Empleado empleadoMasAntiguo;
+    int cantEmpleadosXCat[CANT_CATEGORIA];
+}Resultados;
+
 int trozarLinea(char* linea, Empleado* empleado);
 int cargarDatos(const char *nombreArchivo, Empleado *empleado) ;
 void mostrarEmpleados(Empleado *empleados, int cantidad);
+int compararFechas(Fecha f1, Fecha f2);
 
 // nomina_empleados.h
 
 int eliminarEmpleadosInactivos(Empleado *empleados,int *cantidad);
+Empleado buscarEmpleadoMasAntiguo(Empleado *empleados,int *cantidad);
 
 /*
-void buscarMasAntiguo();
 void contarPorCategoria();
 void actualizarSueldos();
 */
