@@ -31,12 +31,6 @@
 #include <string.h>
 
 
-typedef struct {
-    char categoria[MAX_CATEGORIAS];
-    int cantidad;
-} CategoriaContador;
-
-
 typedef struct{
     int d;
     int m;
@@ -75,7 +69,7 @@ int compararFechas(Fecha f1, Fecha f2);
 int eliminarEmpleadosInactivos(Empleado *empleados,int *cantidad);
 Empleado buscarEmpleadoMasAntiguo(Empleado *empleados,int *cantidad);
 
-void contarPorCategoria(Empleado *empleados,int *cantidad);
+void contarPorCategoria(Empleado *empleados, int cantidad, Categoria *categorias, int *cantEmpleadosXCat) ;
 
 
 /*
