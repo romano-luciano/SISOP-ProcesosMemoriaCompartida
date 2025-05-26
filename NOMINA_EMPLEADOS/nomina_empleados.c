@@ -255,7 +255,6 @@ void generarArchivosSalida(Empleado *empleados, Resultados *resultados)
 {
     generarNominaActualizada(empleados,&resultados->cantEmpleadosActivos);
     generarArchivoResultados(resultados);
-    generarNominaAntigua();
 }
 
 int generarNominaActualizada(Empleado *empleados, int *cantidadEmpleados){
