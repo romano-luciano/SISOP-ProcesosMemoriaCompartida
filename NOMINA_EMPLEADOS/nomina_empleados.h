@@ -4,31 +4,29 @@
 #include <sys/wait.h>     //para waitpid
 #include <semaphore.h>
 #include <fcntl.h>        //para constantes de semáforos
-#define SEM_NAME "/semaforo_nomina" //el nombre del semaforo debe empezar con "/"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 ///////////////ARCHIVOS DE ENTRADA//////////////
-#define ARC_NOMINA "../nomina.txt"
-#define ARC_CATEGORIA "../categoria.txt"
+#define ARC_NOMINA "../Archivos de Entrada/nomina.txt"
+#define ARC_CATEGORIA "../Archivos de Entrada/categoria.txt"
 
 ///////////////ARCHIVOS DE SALIDA///////////////
-#define ARC_NOMINA_ACT "nomina_actualizada.txt"
-#define ARC_INFORMACION "nomina_informacion.txt"
-#define ARC_NOMINA_ANT "nominaAntigua.txt"
+#define ARC_NOMINA_ACT "../Archivos de Salida/nomina.txt"
+#define ARC_INFORMACION "../Archivos de Salida/nomina_informacion.txt"
+#define ARC_NOMINA_ANT "../Archivos de Salida/nomina_antigua.txt"
 
 /////////////////TAMAÑOS////////////////////////
 #define TAM_NOMYAP 30
 #define TAM_ESTADO 20
 #define TAM_CATEGORIA 20
-#define MAXLINEA 256
+#define MAXLINEA_EMPLEADOS 256
+#define MAXLINEA_CATEGORIA 40
 #define TODO_OK 0
-#define FALLO_ELIMINAR_DUPLICADOS 1
+#define ERROR -1
 #define MAX_EMPLEADOS 100
-
-#define CANT_CATEGORIA 3
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#define CANT_CATEGORIA 4
 
 
 typedef struct{
@@ -54,24 +52,26 @@ typedef struct{
 }Categoria;
 
 typedef struct{
+    int cantEmpleadosActivos;
     int cantEmpleadosElim;
     Empleado empleadoMasAntiguo;
-    int cantEmpleadosXCat[CANT_CATEGORIA];
+    int cantEmpleadosXCat[CANT_CATEGORIA];//Cada posicion representa una categoria [Inicial,Intermedio,Superior,Lider]
 }Resultados;
 
 int trozarLinea(char* linea, Empleado* empleado);
 int cargarDatos(const char *nombreArchivo, Empleado *empleado) ;
 void mostrarEmpleados(Empleado *empleados, int cantidad);
 int compararFechas(Fecha f1, Fecha f2);
-
-// nomina_empleados.h
+int cargarCategoria(Categoria *categoria);
+int trozarLineaCategoria(char *linea, Categoria *categoria);
 
 int eliminarEmpleadosInactivos(Empleado *empleados,int *cantidad);
 Empleado buscarEmpleadoMasAntiguo(Empleado *empleados,int *cantidad);
+void actualizarSueldos(Empleado *empleados, int *cantEmp,const Categoria *categorias);
+void generarArchivosSalida(Empleado *empleados, Resultados *resultados);
+int generarNominaActualizada(Empleado *empleados, int *cantidadEmpleados);
+int generarArchivoResultados(Resultados *resultados);
+void contarPorCategoria(Empleado *empleados, Categoria *categorias, Resultados *resultados);
 
-/*
-void contarPorCategoria();
-void actualizarSueldos();
-*/
 
-#endif // NOMINA_EMPLEADOS_H_INCLUDED
+#endif

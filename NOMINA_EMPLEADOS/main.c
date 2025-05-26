@@ -1,5 +1,4 @@
 #include "nomina_empleados.h"
-
 // Estos cuatro include son necesarios para la memoria compartida
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -13,8 +12,8 @@
 
 int main()
 {
-    pid_t hijo1, hijo2, hijo3, hijo4; // variables que se usan para guardar el valor que devuelve el fork( )
-    sem_t *semMC_NuevaNomina,*semMC_Resultados;
+    pid_t hijo1, hijo2, hijo3, hijo4;
+    sem_t *semMC_NuevaNomina, *semMC_Resultados;
 
     /// 1- Crear semaforo
     // Elimino semaforos anteriorres si quedaron basura
@@ -27,7 +26,7 @@ int main()
 
     if (semMC_NuevaNomina == SEM_FAILED || semMC_Resultados == SEM_FAILED)
     {
-        perror("Error al crear el semaforo");
+        perror("--- Error al crear el semaforo ---");
         exit(EXIT_FAILURE);
     }
 
@@ -36,7 +35,7 @@ int main()
     int IdMCNuevaNomina = shm_open(MC_NUEVA_NOMINA, O_CREAT | O_RDWR, 0666);
     if (IdMCNuevaNomina == -1)
     {
-        perror("Fallo al crear la Memoria Compartida"); // Tira el msj como del tipo error
+        perror("--- FFallo al crear la Memoria Compartida --- "); // Tira el msj como del tipo error
         exit(1);
     }
 
@@ -47,31 +46,17 @@ int main()
     Empleado *empleados = mmap(NULL, sizeof(Empleado) * MAX_EMPLEADOS, PROT_READ | PROT_WRITE, MAP_SHARED, IdMCNuevaNomina, 0);
     if (empleados == MAP_FAILED)
     {
-        perror("mmap");
+        perror("--- Error al ejecutar en la funcion 'mmap' ---");
         exit(1);
     }
 
-    // 2.1 - Abrir archivo nomina.txt y cargar datos a estructura
-    // La variable 'cantidad' no es Mem.Comp
-    int cantidad = cargarDatos(ARC_NOMINA, empleados);
-
-    // Para mostrar el vector empleados
-    /*if (cantidad > 0)
-    {
-        mostrarEmpleados(empleados, cantidad);
-    }
-    else
-    {
-        printf("No se pudieron cargar empleados.\n");
-    }*/
-
-    // 2.3 - Preparo la MC para los resultados de los demas procesos hijos
-    //Como los hijos van calcular y obtener datos, para que eln pradre u otro proceso pueda ver y trabajar esos datos, tienen que
-    //estar en MC, por eso creamos una especifica para los resultados
+    // 2.1 - Preparo la MC para los resultados de los demas procesos hijos
+    // Como los hijos van calcular y obtener datos, para que eln pradre u otro proceso pueda ver y trabajar esos datos, tienen que
+    // estar en MC, por eso creamos una especifica para los resultados
     int IdMCResultados = shm_open(MC_RESULTADOS, O_CREAT | O_RDWR, 0666);
     if (IdMCResultados == -1)
     {
-        perror("Fallo al crear la Memoria Compartida");
+        perror("--- Fallo al crear la Memoria Compartida ---");
         exit(1);
     }
 
@@ -80,55 +65,63 @@ int main()
     Resultados *resultadosDeHijos = mmap(NULL, sizeof(Resultados), PROT_READ | PROT_WRITE, MAP_SHARED, IdMCResultados, 0);
     if (resultadosDeHijos == MAP_FAILED)
     {
-        perror("mmap");
+        perror("--- Error al ejecutar en la funcion 'mmap' ---");
         exit(1);
     }
+
+    // 2.2 -  Cargamos los datos de categoria.txt a la variable 'categoriasYAumentos' para que pueda ser usado en el hijo 3 y 4
+    Categoria categoriasYAumentos[CANT_CATEGORIA];
+    cargarCategoria(categoriasYAumentos);
+    
+    // 2.3 - Abrir archivo nomina.txt y cargar datos a estructura
+    //Usamos como contador temporal la variable cantEmpleadosActivos de la estructura resultados
+    sem_wait(semMC_Resultados);
+    resultadosDeHijos->cantEmpleadosActivos = cargarDatos(ARC_NOMINA, empleados);  
+    sem_post(semMC_Resultados);
 
     /// 3- Crear proceso hijo 1 (Elimina empelados inactivos)
     hijo1 = fork(); // Hijo 1 usa semaforo porque modifica los datos
     if (hijo1 == 0)
     {
-        puts("--- Eliminando empleados inactivos ---\n");
+        puts("--- Eliminando empleados inactivos ---");
         // Bloquea acceso a datos compartidos
         sem_wait(semMC_NuevaNomina);
         sem_wait(semMC_Resultados);
 
         // Codigo para eliminar inactivos
-        resultadosDeHijos->cantEmpleadosElim = eliminarEmpleadosInactivos(empleados,&cantidad);
+        resultadosDeHijos->cantEmpleadosElim = eliminarEmpleadosInactivos(empleados, &resultadosDeHijos->cantEmpleadosActivos);
 
         // Libera accesos
         sem_post(semMC_NuevaNomina);
         sem_post(semMC_Resultados);
         exit(0);
-    }
-
-    //Espero a que termine el hijo 1
-    waitpid(hijo1, NULL, 0);
-    printf("Se eliminaron %d empelados\n\n",resultadosDeHijos->cantEmpleadosElim);
+    }    
 
     /// 4- Crear proceso hijo 2 (buscar mas antiguo)
     hijo2 = fork();
     if (hijo2 == 0)
     {
-        puts("-- Buscando al empleado mas antiguo ---\n");
+        puts("-- Buscando al empleado mas antiguo ---");
         sem_wait(semMC_Resultados);
 
         // Codigo para buscar al empleado mas antiguo
-        resultadosDeHijos->empleadoMasAntiguo = buscarEmpleadoMasAntiguo(empleados,&cantidad);
+        resultadosDeHijos->empleadoMasAntiguo = buscarEmpleadoMasAntiguo(empleados, &resultadosDeHijos->cantEmpleadosActivos);
 
         sem_post(semMC_Resultados);
         exit(0);
     }
 
-    waitpid(hijo2, NULL, 0);
-    printf("El empleado mas antiguo es %s que ingreso el %d/%d/%d\n\n",resultadosDeHijos->empleadoMasAntiguo.nombre_y_ap,resultadosDeHijos->empleadoMasAntiguo.fecha_ingreso.d,resultadosDeHijos->empleadoMasAntiguo.fecha_ingreso.m,resultadosDeHijos->empleadoMasAntiguo.fecha_ingreso.a);
-
     /// 5- Crear hijo 3 (Contar empleados por categoria)
     hijo3 = fork();
     if (hijo3 == 0)
     {
-        puts("Hijo 3: contando empleados por categoria...\n");
+        puts("-- Contando empleados en cada categoria ---");
+        sem_wait(semMC_Resultados);
+
         // Codigo para contar por categoria
+        contarPorCategoria(empleados,categoriasYAumentos,resultadosDeHijos);
+
+        sem_post(semMC_Resultados);
         exit(0);
     }
 
@@ -136,30 +129,31 @@ int main()
     hijo4 = fork();
     if (hijo4 == 0)
     {
-        puts("Hijo 4: actualizando sueldos por categoria...\n");
+        puts("-- Actualizando sueldos ---");
         sem_wait(semMC_NuevaNomina);
-        // Codigo para actualizar sueldos
+
+        // Codigo para actualizar sueldos por categoria
+        actualizarSueldos(empleados, &resultadosDeHijos->cantEmpleadosActivos, categoriasYAumentos);
+
         sem_post(semMC_NuevaNomina);
         exit(0);
     }
 
     /// 7- Esperar a los 3 hijos restantes
+    waitpid(hijo1, NULL, 0);
     waitpid(hijo2, NULL, 0);
     waitpid(hijo3, NULL, 0);
     waitpid(hijo4, NULL, 0);
 
     /// 8- Guardar resultados finales en archivos
-    puts("Padre: generando archivos de salida (nomina, resumen)...\n");
+    puts("--- Generando Archivos de Salida ---");
+    generarArchivosSalida(empleados, resultadosDeHijos);
 
     /// 9- Cerrar y destruir semaforos
     sem_close(semMC_NuevaNomina);
     sem_close(semMC_Resultados);
     sem_unlink(SEM_MC_NUEVA_NOMINA);
     sem_unlink(SEM_MC_RESULTADOS);
-
-    puts("Padre: todo finalizando.\n");
-
-    // falta agregar la parte de archivos y primitivas
 
     // Liberar Mem.Comp
     // Desmapear
@@ -171,16 +165,21 @@ int main()
 
     if (seEliminaMCNuevaNomina == -1 || seEliminaMCResutlados == -1)
     {
-        if(seEliminaMCNuevaNomina == -1){
-            perror("Error al eliminar la memoria compartida de la nueva nomina");
-        }else{
-            perror("Error al eliminar la memoria compartida de resultados");
+        if (seEliminaMCNuevaNomina == -1)
+        {
+            perror("--- Error al eliminar la memoria compartida de la nueva nomina ---");
+        }
+        else
+        {
+            perror("--- Error al eliminar la memoria compartida de resultados ---");
         }
     }
     else
     {
-        printf("Memoria compartida eliminada correctamente.\n");
+        puts("--- Memoria compartida eliminada correctamente ---");
     }
 
-    return 0;
+    puts("--- Proceso finalizo ---");
+
+    return TODO_OK;
 }
