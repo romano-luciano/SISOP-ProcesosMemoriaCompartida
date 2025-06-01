@@ -23,11 +23,13 @@
 #define TAM_CATEGORIA 20
 #define MAXLINEA_EMPLEADOS 256
 #define MAXLINEA_CATEGORIA 40
-#define TODO_OK 0
-#define ERROR -1
 #define MAX_EMPLEADOS 100
 #define CANT_CATEGORIA 4
-
+/////////////////VALORES////////////////////////
+#define TODO_OK 0
+#define ERROR -1
+#define ESPERANDO_ESTADO 1
+#define TERMINEN_ESTADO 0
 
 typedef struct{
     int d;
