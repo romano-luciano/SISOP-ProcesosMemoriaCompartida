@@ -30,7 +30,7 @@ int main()
 
     if (semMC_NuevaNomina == SEM_FAILED || semMC_Resultados == SEM_FAILED || semMC_Terminal == SEM_FAILED) 
     {
-        perror("--- Error al crear los semaforo ---");
+        perror("--  Error al crear los semaforo");
         exit(EXIT_FAILURE);
     }
 
@@ -39,7 +39,7 @@ int main()
     int IdMCNuevaNomina = shm_open(MC_NUEVA_NOMINA, O_CREAT | O_RDWR, 0666);
     if (IdMCNuevaNomina == -1)
     {
-        perror("--- FFallo al crear la Memoria Compartida para 'empleados' --- "); // Tira el msj como del tipo error
+        perror("--  Fallo al crear la Memoria Compartida para 'empleados'"); // Tira el msj como del tipo error
         exit(1);
     }
 
@@ -50,7 +50,7 @@ int main()
     Empleado *empleados = mmap(NULL, sizeof(Empleado) * MAX_EMPLEADOS, PROT_READ | PROT_WRITE, MAP_SHARED, IdMCNuevaNomina, 0);
     if (empleados == MAP_FAILED)
     {
-        perror("--- Error al ejecutar en la funcion 'mmap'  para 'empleados' ---");
+        perror("--  Error al ejecutar en la funcion 'mmap'  para 'empleados'");
         exit(1);
     }
 
@@ -60,7 +60,7 @@ int main()
     int IdMCResultados = shm_open(MC_RESULTADOS, O_CREAT | O_RDWR, 0666);
     if (IdMCResultados == -1)
     {
-        perror("--- Fallo al crear la Memoria Compartida para 'resultadosHijos' ---");
+        perror("--  Fallo al crear la Memoria Compartida para 'resultadosHijos'");
         exit(1);
     }
 
@@ -69,7 +69,7 @@ int main()
     Resultados *resultadosDeHijos = mmap(NULL, sizeof(Resultados), PROT_READ | PROT_WRITE, MAP_SHARED, IdMCResultados, 0);
     if (resultadosDeHijos == MAP_FAILED)
     {
-        perror("--- Error al ejecutar en la funcion 'mmap' para 'resultadosHijos' ---");
+        perror("--  Error al ejecutar en la funcion 'mmap' para 'resultadosHijos'");
         exit(1);
     }
 
@@ -77,7 +77,7 @@ int main()
     int IdMCTerminal = shm_open(MC_TERMINAL, O_CREAT | O_RDWR, 0666);
     if (IdMCTerminal == -1)
     {
-        perror("--- Fallo al crear la Memoria Compartida para 'estadoTerminal' ---");
+        perror("--  Fallo al crear la Memoria Compartida para 'estadoTerminal'");
         exit(1);
     }
 
@@ -86,7 +86,7 @@ int main()
     int *estadoTerminal = mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, IdMCTerminal, 0);
     if (estadoTerminal == MAP_FAILED)
     {
-        perror("--- Error al ejecutar en la funcion 'mmap' para 'estadoTerminal' ---");
+        perror("--  Error al ejecutar en la funcion 'mmap' para 'estadoTerminal'");
         exit(1);
     }
 
@@ -103,6 +103,8 @@ int main()
     sem_wait(semMC_Resultados);
     resultadosDeHijos->cantEmpleadosActivos = cargarDatos(ARC_NOMINA, empleados);  
     sem_post(semMC_Resultados);
+
+    puts("--    Gestion de nomina en proceso");
 
     /// 3- Crear proceso hijo 1 (Elimina empelados inactivos)
     hijo1 = fork(); // Hijo 1 usa semaforo porque modifica los datos
@@ -124,7 +126,7 @@ int main()
         while (*estadoTerminal) {
             sleep(1);
         }
-        puts("---   Empleados inactivos eliminados    ---");
+        puts("--    Empleados inactivos eliminados");
         exit(0);
     }    
 
@@ -143,7 +145,7 @@ int main()
         while (*estadoTerminal) {
             sleep(1);
         }
-        puts("--    Empleado mas antiguo encontrado ---");
+        puts("--    Empleado mas antiguo encontrado");
         exit(0);
     }
 
@@ -162,7 +164,7 @@ int main()
         while (*estadoTerminal) {
             sleep(1);
         }
-        puts("--    Empleados en cada categoria contados   ---");
+        puts("--    Empleados en cada categoria contados");
         exit(0);
     }
 
@@ -181,7 +183,7 @@ int main()
         while (*estadoTerminal) {
             sleep(1);
         }
-        puts("--    Sueldos actualizados    ---");
+        puts("--    Sueldos actualizados");
         exit(0);
     }
 
@@ -200,7 +202,7 @@ int main()
             break;
         } 
     }
-    
+    printf("\n");
     
 
     /// 7.2 - Esperar a los 3 hijos restantes
@@ -210,7 +212,7 @@ int main()
     waitpid(hijo4, NULL, 0);
 
     /// 8- Guardar resultados finales en archivos
-    puts("---   Generando Archivos de Salida    ---");
+    puts("\n--    Archivos de Salida Generados");
     generarArchivosSalida(empleados, resultadosDeHijos);
 
     /// 9- Cerrar y destruir semaforos
@@ -235,25 +237,25 @@ int main()
     {
         if (seEliminaMCNuevaNomina == -1)
         {
-            perror("--- Error al eliminar la memoria compartida de la nueva nomina ---");
+            perror("--  Error al eliminar la memoria compartida de la nueva nomina");
         }
         else
         {
             if(seEliminaMCResutlados == -1){
-                perror("--- Error al eliminar la memoria compartida de resultados ---");
+                perror("--  Error al eliminar la memoria compartida de resultados");
             }
             else
             {
-                perror("--- Error al eliminar la memoria compartida de la Terminal ---");
+                perror("--  Error al eliminar la memoria compartida de la Terminal");
             }
         }
     }
     else
     {
-        puts("--- Memoria compartida eliminada correctamente ---");
+        puts("--    Memoria compartida eliminada correctamente");
     }
 
-    puts("---   Proceso finalizo    ---");
+    puts("--    Proceso finalizado");
 
     return TODO_OK;
 }
