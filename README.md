@@ -5,7 +5,7 @@ Proyecto desarrollado en lenguaje C
 EJECUCION
 -------------------------------------------------------------------------
 Para la ejecucion del Proceso, lo primero que se debe hacer es ubicarse en la carpea 'SISOP-ProcesosMemoriaCompartida/NOMINA_EMPLEADOS'.
-Despues para la compilacion <gcc main.c nomina_empleados>. Y se ejecuta con <./main>
+Despues para la compilacion "gcc main.c nomina_empleados.c -o nomina". Y se ejecuta con <./nomina>
 
 Se trabajara con los archivos "nomina.txt" y "categorias.txt" ubicados en la carpeta 'Archivos de Entrada' del proyecto.
 
