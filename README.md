@@ -23,7 +23,7 @@ Una ves que el proceso esta en funcionamiento, y mientras no se indique que el m
 
 MONITOREO
 -------
-Al usar la interfaz POSIX, para monitorear la memoria compartida utilzada en el proceso usamos:
+Al usar la interfaz POSIX, para monitorear la memoria compartida utilizada en el proceso usamos:
 ls /dev/shm
 
 Para ver los procesos y sus hijos en forma de arbol usamos:

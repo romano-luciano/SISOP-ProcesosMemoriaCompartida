@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/prctl.h>
+#include <asm-generic/signal-defs.h>
 
 #define MC_NUEVA_NOMINA "/mi_mc_nueva_nomina"
 #define MC_RESULTADOS "/mi_mc_resultados"
@@ -28,9 +29,16 @@ pid_t hijo1 = -1, hijo2 = -1, hijo3 = -1, hijo4 = -1;
 void manejador_senial(int sig);
 void manejador_senial_hijo(int sig);
 void liberar_recursos();
+void sigchld_handler();
 
 int main()
 {
+    struct sigaction sa;
+    sa.sa_handler = sigchld_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART; // Opcional, para reiniciar llamadas bloqueantes
+    sigaction(SIGCHLD, &sa, NULL);
+    
     signal(SIGINT, manejador_senial);
     signal(SIGTERM, manejador_senial);
 
@@ -342,5 +350,18 @@ void liberar_recursos() {
     else
     {
         puts("--    Memoria compartida eliminada correctamente");
+    }
+}
+void sigchld_handler(int sig) {
+    int status;
+    pid_t pid;
+
+    // Espera no bloqueante para recolectar hijos muertos
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+        if (pid == hijo1 || pid == hijo4) {
+            printf("El hijo %d (hijo1 o hijo4) terminó. Finalizando el programa.\n", pid);
+            liberar_recursos();
+            exit(1);
+        }
     }
 }
