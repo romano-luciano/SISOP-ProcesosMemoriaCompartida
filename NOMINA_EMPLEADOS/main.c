@@ -5,17 +5,34 @@
 #include <unistd.h>
 #include <semaphore.h>
 
+//Manejo de señales
+#include <signal.h>
+#include <sys/wait.h>
+#include <sys/prctl.h>
+
 #define MC_NUEVA_NOMINA "/mi_mc_nueva_nomina"
 #define MC_RESULTADOS "/mi_mc_resultados"
 #define MC_TERMINAL "/mi_mc_terminal"
 #define SEM_MC_NUEVA_NOMINA "/semaforo_nuevaNomina"
 #define SEM_MC_RESULTADOS "/semaforo_resultados"
-#define SEM_MC_TERMINAL "/semaforo_resultados"
+#define SEM_MC_TERMINAL "/semaforo_terminal"
+
+//Lo definis como variables globales 
+Empleado *empleados = NULL;
+Resultados *resultadosDeHijos = NULL;
+int *estadoTerminal = NULL;
+sem_t *semMC_NuevaNomina = NULL, *semMC_Resultados = NULL, *semMC_Terminal = NULL;
+pid_t hijo1 = -1, hijo2 = -1, hijo3 = -1, hijo4 = -1;
+
+// Estas funciones se ejecuta si el padre recibe una senal como Ctrl+C o kill
+void manejador_senial(int sig);
+void manejador_senial_hijo(int sig);
+void liberar_recursos();
 
 int main()
 {
-    pid_t hijo1, hijo2, hijo3, hijo4;
-    sem_t *semMC_NuevaNomina, *semMC_Resultados, *semMC_Terminal;
+    signal(SIGINT, manejador_senial);
+    signal(SIGTERM, manejador_senial);
 
     /// 1- Crear semaforo
     // Elimino semaforos anteriorres si quedaron basura
@@ -47,7 +64,7 @@ int main()
     ftruncate(IdMCNuevaNomina, sizeof(Empleado) * MAX_EMPLEADOS);
 
     // Hace que el proceso puede usar el arreglo 'empleados' como si fuera una variable normal, pero en realidad está accediendo a memoria compartida.
-    Empleado *empleados = mmap(NULL, sizeof(Empleado) * MAX_EMPLEADOS, PROT_READ | PROT_WRITE, MAP_SHARED, IdMCNuevaNomina, 0);
+    empleados = mmap(NULL, sizeof(Empleado) * MAX_EMPLEADOS, PROT_READ | PROT_WRITE, MAP_SHARED, IdMCNuevaNomina, 0);
     if (empleados == MAP_FAILED)
     {
         perror("--  Error al ejecutar en la funcion 'mmap'  para 'empleados'");
@@ -66,7 +83,7 @@ int main()
 
     ftruncate(IdMCResultados, sizeof(Resultados));
 
-    Resultados *resultadosDeHijos = mmap(NULL, sizeof(Resultados), PROT_READ | PROT_WRITE, MAP_SHARED, IdMCResultados, 0);
+    resultadosDeHijos = mmap(NULL, sizeof(Resultados), PROT_READ | PROT_WRITE, MAP_SHARED, IdMCResultados, 0);
     if (resultadosDeHijos == MAP_FAILED)
     {
         perror("--  Error al ejecutar en la funcion 'mmap' para 'resultadosHijos'");
@@ -83,7 +100,7 @@ int main()
 
     ftruncate(IdMCTerminal, sizeof(int));
 
-    int *estadoTerminal = mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, IdMCTerminal, 0);
+    estadoTerminal = mmap(NULL, sizeof(int), PROT_READ | PROT_WRITE, MAP_SHARED, IdMCTerminal, 0);
     if (estadoTerminal == MAP_FAILED)
     {
         perror("--  Error al ejecutar en la funcion 'mmap' para 'estadoTerminal'");
@@ -110,6 +127,9 @@ int main()
     hijo1 = fork(); // Hijo 1 usa semaforo porque modifica los datos
     if (hijo1 == 0)
     {
+        prctl(PR_SET_PDEATHSIG, SIGTERM);
+        signal(SIGINT, manejador_senial_hijo);
+        signal(SIGTERM, manejador_senial_hijo);
         
         // Bloquea acceso a datos compartidos
         sem_wait(semMC_NuevaNomina);
@@ -134,7 +154,10 @@ int main()
     hijo2 = fork();
     if (hijo2 == 0)
     {
-        
+        prctl(PR_SET_PDEATHSIG, SIGTERM);
+        signal(SIGINT, manejador_senial_hijo);
+        signal(SIGTERM, manejador_senial_hijo);
+
         sem_wait(semMC_Resultados);
 
         // Codigo para buscar al empleado mas antiguo
@@ -153,7 +176,10 @@ int main()
     hijo3 = fork();
     if (hijo3 == 0)
     {
-        
+        prctl(PR_SET_PDEATHSIG, SIGTERM);
+        signal(SIGINT, manejador_senial_hijo);
+        signal(SIGTERM, manejador_senial_hijo);
+
         sem_wait(semMC_Resultados);
 
         // Codigo para contar por categoria
@@ -172,7 +198,10 @@ int main()
     hijo4 = fork();
     if (hijo4 == 0)
     {
-        
+        prctl(PR_SET_PDEATHSIG, SIGTERM);
+        signal(SIGINT, manejador_senial_hijo);
+        signal(SIGTERM, manejador_senial_hijo);
+
         sem_wait(semMC_NuevaNomina);
 
         // Codigo para actualizar sueldos por categoria
@@ -215,19 +244,79 @@ int main()
     puts("\n--    Archivos de Salida Generados");
     generarArchivosSalida(empleados, resultadosDeHijos);
 
-    /// 9- Cerrar y destruir semaforos
-    sem_close(semMC_NuevaNomina);
-    sem_close(semMC_Resultados);
-    sem_close(semMC_Terminal);
+    /// 9- Cerrar y destruir semaforos y liberar recursos compartidos
+    liberar_recursos();
+
+    puts("--    Proceso finalizado");
+
+    return TODO_OK;
+}
+
+void manejador_senial(int sig) {
+    printf("\n--    Señal recibida. Terminando hijos y liberando recursos...\n");
+    if (hijo1 > 0) 
+        kill(hijo1, SIGTERM);
+
+    if (hijo2 > 0) 
+        kill(hijo2, SIGTERM);
+
+    if (hijo3 > 0) 
+        kill(hijo3, SIGTERM);
+
+    if (hijo4 > 0) 
+        kill(hijo4, SIGTERM);
+
+    liberar_recursos();
+
+    exit(EXIT_FAILURE);
+}
+
+void manejador_senial_hijo(int sig) {
+    printf("--  Hijo %d recibio señal %d. Liberando recursos...\n", getpid(), sig);
+
+    if (empleados) 
+        munmap(empleados, sizeof(Empleado) * MAX_EMPLEADOS);
+
+    if (resultadosDeHijos) 
+        munmap(resultadosDeHijos, sizeof(Resultados));
+
+    if (estadoTerminal) 
+        munmap(estadoTerminal, sizeof(int));
+
+    if (semMC_NuevaNomina) 
+        	sem_close(semMC_NuevaNomina);
+
+    if (semMC_Resultados) 
+        sem_close(semMC_Resultados);
+
+    if (semMC_Terminal) 
+        sem_close(semMC_Terminal);
+
+    exit(EXIT_FAILURE);
+}
+
+void liberar_recursos() {
+    if (semMC_NuevaNomina) 
+        sem_close(semMC_NuevaNomina);
+
+    if (semMC_Resultados) 
+        sem_close(semMC_Resultados);
+
+    if (semMC_Terminal) 
+        sem_close(semMC_Terminal);
+    
     sem_unlink(SEM_MC_NUEVA_NOMINA);
     sem_unlink(SEM_MC_RESULTADOS);
     sem_unlink(SEM_MC_TERMINAL);
 
-    // Liberar Mem.Comp
-    // Desmapear
-    munmap(empleados, sizeof(Empleado) * MAX_EMPLEADOS);
-    munmap(resultadosDeHijos, sizeof(Resultados));
-    munmap(estadoTerminal, sizeof(int));
+    if (empleados) 
+        munmap(empleados, sizeof(Empleado) * MAX_EMPLEADOS);
+
+    if (resultadosDeHijos) 
+        munmap(resultadosDeHijos, sizeof(Resultados));
+
+    if (estadoTerminal) 
+        munmap(estadoTerminal, sizeof(int));
 
     int seEliminaMCNuevaNomina = shm_unlink(MC_NUEVA_NOMINA);
     int seEliminaMCResutlados = shm_unlink(MC_RESULTADOS);
@@ -254,8 +343,4 @@ int main()
     {
         puts("--    Memoria compartida eliminada correctamente");
     }
-
-    puts("--    Proceso finalizado");
-
-    return TODO_OK;
 }
