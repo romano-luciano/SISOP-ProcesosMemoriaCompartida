@@ -17,22 +17,23 @@
 #define SEM_MC_NUEVA_NOMINA "/semaforo_nuevaNomina"
 #define SEM_MC_RESULTADOS "/semaforo_resultados"
 #define SEM_MC_TERMINAL "/semaforo_terminal"
-
+volatile sig_atomic_t terminado_por_ctrlc = 0;
 //Lo definis como variables globales 
 Empleado *empleados = NULL;
 Resultados *resultadosDeHijos = NULL;
 int *estadoTerminal = NULL;
 sem_t *semMC_NuevaNomina = NULL, *semMC_Resultados = NULL, *semMC_Terminal = NULL;
 pid_t hijo1 = -1, hijo2 = -1, hijo3 = -1, hijo4 = -1;
-
+void sigchld_handler(int sig);
 // Estas funciones se ejecuta si el padre recibe una senal como Ctrl+C o kill
 void manejador_senial(int sig);
 void manejador_senial_hijo(int sig);
 void liberar_recursos();
-void sigchld_handler();
+
 
 int main()
 {
+
     struct sigaction sa;
     sa.sa_handler = sigchld_handler;
     sigemptyset(&sa.sa_mask);
@@ -260,7 +261,9 @@ int main()
     return TODO_OK;
 }
 
-void manejador_senial(int sig) {
+void manejador_senial(int sig) 
+{
+    terminado_por_ctrlc = 1;
     printf("\n--    Señal recibida. Terminando hijos y liberando recursos...\n");
     if (hijo1 > 0) 
         kill(hijo1, SIGTERM);
@@ -275,11 +278,13 @@ void manejador_senial(int sig) {
         kill(hijo4, SIGTERM);
 
     liberar_recursos();
-
     exit(EXIT_FAILURE);
 }
 
 void manejador_senial_hijo(int sig) {
+
+    
+    
     printf("--  Hijo %d recibio señal %d. Liberando recursos...\n", getpid(), sig);
 
     if (empleados) 
@@ -303,7 +308,8 @@ void manejador_senial_hijo(int sig) {
     exit(EXIT_FAILURE);
 }
 
-void liberar_recursos() {
+void liberar_recursos() 
+{
     if (semMC_NuevaNomina) 
         sem_close(semMC_NuevaNomina);
 
@@ -352,10 +358,12 @@ void liberar_recursos() {
         puts("--    Memoria compartida eliminada correctamente");
     }
 }
-void sigchld_handler(int sig) {
+void sigchld_handler(int sig) 
+{
     int status;
     pid_t pid;
-
+    if(terminado_por_ctrlc == 1)
+        return;
     // Espera no bloqueante para recolectar hijos muertos
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
         if (pid == hijo1 || pid == hijo4) {
